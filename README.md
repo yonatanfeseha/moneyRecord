@@ -1,6 +1,6 @@
 # Payment Records
 
-A simple single-user app to add, edit, delete, search and export money/payment records.
+A multi-user app where each signed-in user can add, edit, delete, search, filter, and export only their own money/payment records.
 React talks directly to Firebase. There is no custom backend.
 
 ## Technologies
@@ -39,8 +39,8 @@ npm run preview   # preview the production build locally
 ### 3. Create the Firestore database
 **Build → Firestore Database → Create database.** Choose a location and start in **production mode** (the rules below will be added next). The `records` collection is created automatically when you save the first record.
 
-### 4. Create the first (and only) user
-**Build → Authentication → Users → Add user.** Enter your email and password. After it is created, copy the **User UID** from the users table. You need it for the security rules.
+### 4. Create user accounts
+In Firebase Console → Authentication → Users, create each user's email/password account. User accounts do not automatically grant access to other users' records; every record is scoped to its owner's Firebase UID.
 
 ### 5. Configure `.env`
 ```bash
@@ -59,20 +59,9 @@ VITE_FIREBASE_APP_ID=             # appId
 Restart `npm run dev` after editing `.env`.
 
 ### 6. Firestore security rules
-Open **Firestore Database → Rules**, paste the following, replace `YOUR_USER_UID` with the UID from step 4, and click **Publish**:
+Open Firestore Database → Rules, paste the contents of `firestore.rules`, and click **Publish**. Each record must contain `ownerUid` equal to the creating user's Firebase UID. The app queries by the current user's UID, and rules enforce ownership in the database.
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /records/{recordId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == "YOUR_USER_UID";
-    }
-  }
-}
-```
-Anyone not logged in as that user cannot read, create, update or delete records. Everything else in the database is denied by default. The same rules are in `firestore.rules`.
+**Important migration note:** existing records created before owner-based access was added do not have `ownerUid`. They will not appear after the new rules/code are enabled. Before publishing the new rules, back up your data and add the correct `ownerUid` to every existing record in Firestore. Assign each record to exactly the user who should own it; do not assign all records to both users. If you cannot confidently identify the owner of an old record, leave it unassigned until you decide. New records created by this version receive `ownerUid` automatically.
 
 ## Run locally
 

@@ -33,9 +33,20 @@ export default function Dashboard() {
   }, [toast]);
 
   useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) {
+      setRecords([]);
+      setLoading(false);
+      return undefined;
+    }
+
     const unsubscribe = subscribeToRecords(
+      user.uid,
       (data) => { setRecords(data); setLoading(false); },
-      () => { setLoading(false); notify("error", "Unable to load records. Please try again."); }
+      () => {
+        setLoading(false);
+        notify("error", "Unable to load your records. Please try again.");
+      }
     );
     return unsubscribe;
   }, []);

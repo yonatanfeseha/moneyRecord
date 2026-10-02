@@ -6,20 +6,25 @@ import {
   doc,
   onSnapshot,
   serverTimestamp,
+  query,
+  where,
 } from "firebase/firestore";
-import { db } from "./config.js";
+import { auth, db } from "./config.js";
 
 const recordsRef = collection(db, "records");
 
-// Real-time listener: the table refreshes automatically after add/edit/delete.
-// Sorting is done client-side (date desc, then createdAt desc) so no composite index is needed.
-export function subscribeToRecords(onData, onError) {
+// Each signed-in user subscribes only to records they own.
+// Firestore Security Rules independently enforce this ownership.
+export function subscribeToRecords(uid, onData, onError) {
+  const userRecordsQuery = query(recordsRef, where("ownerUid", "==", uid));
+
   return onSnapshot(
-    recordsRef,
+    userRecordsQuery,
     (snapshot) => {
       const records = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       const ts = (r) =>
-        r.createdAt?.toMillis ? r.createdAt.toMillis() : Date.now();
+        r.createdAt?.toMillis ? r.createdAt.toMillis() : 0;
+
       records.sort((a, b) => {
         if (a.date !== b.date) return a.date < b.date ? 1 : -1;
         return ts(b) - ts(a);
@@ -30,15 +35,20 @@ export function subscribeToRecords(onData, onError) {
   );
 }
 
-export const addRecord = ({ date, receiverName, reason, amount, method }) =>
-  addDoc(recordsRef, {
+export const addRecord = ({ date, receiverName, reason, amount, method }) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("You must be signed in to add a record.");
+
+  return addDoc(recordsRef, {
     date,
     receiverName,
     reason,
     amount,
     method,
+    ownerUid: user.uid,
     createdAt: serverTimestamp(),
   });
+};
 
 export const updateRecord = (
   id,
