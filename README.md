@@ -100,4 +100,4 @@ If you deploy to a custom domain, add it under **Authentication → Settings →
 
 - The Firebase web config is not secret. Access is protected by Authentication plus the Firestore rules above.
 - Records are sorted by date (newest first), then by creation time.
-- Excel export contains the currently filtered records and a bold Total Amount row.
+- Each record is marked as Debit (money out) or Credit (money in). Excel export places the amount in the matching Debit or Credit column and includes separate totals for both columns. Older records without a type are treated as Credit until edited.

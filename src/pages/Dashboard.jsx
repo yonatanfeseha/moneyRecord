@@ -62,8 +62,12 @@ export default function Dashboard() {
     });
   }, [records, search, dateFilter]);
 
-  const total = useMemo(
-    () => filtered.reduce((sum, r) => sum + Number(r.amount || 0), 0),
+  const totalDebit = useMemo(
+    () => filtered.reduce((sum, r) => sum + (r.type === "debit" ? Number(r.amount || 0) : 0), 0),
+    [filtered]
+  );
+  const totalCredit = useMemo(
+    () => filtered.reduce((sum, r) => sum + (r.type === "debit" ? 0 : Number(r.amount || 0)), 0),
     [filtered]
   );
   const hasFilters = search.trim() !== "" || dateFilter !== "";
@@ -148,14 +152,18 @@ export default function Dashboard() {
           onCancelEdit={() => setEditingRecord(null)}
         />
 
-        <section className="grid gap-4 sm:grid-cols-2">
+        <section className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg bg-white p-4 shadow-sm">
             <div className="text-sm text-gray-500">Records</div>
             <div className="text-2xl font-semibold">{filtered.length}</div>
           </div>
           <div className="rounded-lg bg-white p-4 shadow-sm">
-            <div className="text-sm text-gray-500">Total Amount</div>
-            <div className="text-2xl font-semibold tabular-nums">{formatAmount(total)}</div>
+            <div className="text-sm text-gray-500">Total Debit (Money Out)</div>
+            <div className="text-2xl font-semibold tabular-nums">{formatAmount(totalDebit)}</div>
+          </div>
+          <div className="rounded-lg bg-white p-4 shadow-sm">
+            <div className="text-sm text-gray-500">Total Credit (Money In)</div>
+            <div className="text-2xl font-semibold tabular-nums">{formatAmount(totalCredit)}</div>
           </div>
         </section>
 

@@ -6,6 +6,7 @@ const empty = () => ({
   receiverName: "",
   reason: "",
   amount: "",
+  type: "credit",
   method: "",
 });
 
@@ -28,6 +29,7 @@ export default function RecordForm({
         receiverName: editingRecord.receiverName,
         reason: editingRecord.reason,
         amount: String(editingRecord.amount),
+        type: editingRecord.type === "debit" ? "debit" : "credit",
         method: editingRecord.method,
       });
     } else {
@@ -53,6 +55,7 @@ export default function RecordForm({
       receiverName: form.receiverName.trim(),
       reason: form.reason.trim(),
       amount: Math.round(amount * 100) / 100,
+      type: form.type,
       method: form.method.trim(),
     });
     if (ok) setForm(empty());
@@ -135,6 +138,33 @@ export default function RecordForm({
               disabled={saving}
             />
           </div>
+          <fieldset className="sm:col-span-2">
+            <legend className="mb-2 block text-sm font-medium">Transaction Type</legend>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="debit"
+                  checked={form.type === "debit"}
+                  onChange={change}
+                  disabled={saving}
+                />
+                <span>Debit (money out)</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="credit"
+                  checked={form.type === "credit"}
+                  onChange={change}
+                  disabled={saving}
+                />
+                <span>Credit (money in)</span>
+              </label>
+            </div>
+          </fieldset>
           <div>
             <label htmlFor="method" className="mb-1 block text-sm font-medium">
               Method

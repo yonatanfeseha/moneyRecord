@@ -33,7 +33,8 @@ export default function RecordTable({
             <th className="px-4 py-3 font-semibold">Date</th>
             <th className="px-4 py-3 font-semibold">Receiver Name</th>
             <th className="px-4 py-3 font-semibold">Reason</th>
-            <th className="px-4 py-3 text-right font-semibold">Amount</th>
+            <th className="px-4 py-3 text-right font-semibold">Debit</th>
+            <th className="px-4 py-3 text-right font-semibold">Credit</th>
             <th className="px-4 py-3 font-semibold">Method</th>
             <th className="px-4 py-3 font-semibold">Actions</th>
           </tr>
@@ -49,7 +50,10 @@ export default function RecordTable({
               <td className="px-4 py-3">{r.receiverName}</td>
               <td className="px-4 py-3">{r.reason}</td>
               <td className="whitespace-nowrap px-4 py-3 text-right tabular-nums">
-                {formatAmount(r.amount)}
+                {r.type === "debit" ? formatAmount(r.amount) : "—"}
+              </td>
+              <td className="whitespace-nowrap px-4 py-3 text-right tabular-nums">
+                {r.type !== "debit" ? formatAmount(r.amount) : "—"}
               </td>
               <td className="px-4 py-3">{r.method}</td>
 

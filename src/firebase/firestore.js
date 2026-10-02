@@ -35,7 +35,7 @@ export function subscribeToRecords(uid, onData, onError) {
   );
 }
 
-export const addRecord = ({ date, receiverName, reason, amount, method }) => {
+export const addRecord = ({ date, receiverName, reason, amount, type, method }) => {
   const user = auth.currentUser;
   if (!user) throw new Error("You must be signed in to add a record.");
 
@@ -44,6 +44,7 @@ export const addRecord = ({ date, receiverName, reason, amount, method }) => {
     receiverName,
     reason,
     amount,
+    type: type === "debit" ? "debit" : "credit",
     method,
     ownerUid: user.uid,
     createdAt: serverTimestamp(),
@@ -52,13 +53,14 @@ export const addRecord = ({ date, receiverName, reason, amount, method }) => {
 
 export const updateRecord = (
   id,
-  { date, receiverName, reason, amount, method },
+  { date, receiverName, reason, amount, type, method },
 ) =>
   updateDoc(doc(db, "records", id), {
     date,
     receiverName,
     reason,
     amount,
+    type: type === "debit" ? "debit" : "credit",
     method,
   });
 
