@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase/config.js";
 import { logout } from "../firebase/auth.js";
 import {
-  subscribeToRecords, addRecord, updateRecord, deleteRecord,
+  subscribeToRecords,
+  addRecord,
+  updateRecord,
+  deleteRecord,
 } from "../firebase/firestore.js";
 import RecordForm from "../components/RecordForm.jsx";
 import RecordTable from "../components/RecordTable.jsx";
@@ -42,11 +45,14 @@ export default function Dashboard() {
 
     const unsubscribe = subscribeToRecords(
       user.uid,
-      (data) => { setRecords(data); setLoading(false); },
+      (data) => {
+        setRecords(data);
+        setLoading(false);
+      },
       () => {
         setLoading(false);
         notify("error", "Unable to load your records. Please try again.");
-      }
+      },
     );
     return unsubscribe;
   }, []);
@@ -57,18 +63,27 @@ export default function Dashboard() {
       if (dateFilter && r.date !== dateFilter) return false;
       if (!q) return true;
       return (
-        r.receiverName?.toLowerCase().includes(q) || r.reason?.toLowerCase().includes(q)
+        r.receiverName?.toLowerCase().includes(q) ||
+        r.reason?.toLowerCase().includes(q)
       );
     });
   }, [records, search, dateFilter]);
 
   const totalDebit = useMemo(
-    () => filtered.reduce((sum, r) => sum + (r.type === "debit" ? Number(r.amount || 0) : 0), 0),
-    [filtered]
+    () =>
+      filtered.reduce(
+        (sum, r) => sum + (r.type === "debit" ? Number(r.amount || 0) : 0),
+        0,
+      ),
+    [filtered],
   );
   const totalCredit = useMemo(
-    () => filtered.reduce((sum, r) => sum + (r.type === "debit" ? 0 : Number(r.amount || 0)), 0),
-    [filtered]
+    () =>
+      filtered.reduce(
+        (sum, r) => sum + (r.type === "debit" ? 0 : Number(r.amount || 0)),
+        0,
+      ),
+    [filtered],
   );
   const hasFilters = search.trim() !== "" || dateFilter !== "";
 
@@ -130,17 +145,21 @@ export default function Dashboard() {
           <h1 className="text-lg font-semibold">Payment Records</h1>
           <div className="flex items-center gap-3 text-sm">
             <span className="text-gray-600">{auth.currentUser?.email}</span>
-            <button className="btn-secondary" onClick={handleLogout}>Logout</button>
+            <button className="btn-secondary" onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl space-y-4 px-4 py-6">
         {toast && (
-          <div role="status"
+          <div
+            role="status"
             className={`fixed right-4 top-4 z-50 max-w-xs rounded-md px-4 py-3 text-sm text-white shadow-lg ${
               toast.type === "success" ? "bg-emerald-700" : "bg-red-600"
-            }`}>
+            }`}
+          >
             {toast.message}
           </div>
         )}
@@ -158,37 +177,67 @@ export default function Dashboard() {
             <div className="text-2xl font-semibold">{filtered.length}</div>
           </div>
           <div className="rounded-lg bg-white p-4 shadow-sm">
-            <div className="text-sm text-gray-500">Total Debit (Money Out)</div>
-            <div className="text-2xl font-semibold tabular-nums">{formatAmount(totalDebit)}</div>
+            <div className="text-sm text-gray-500">Total Debit </div>
+            <div className="text-2xl font-semibold tabular-nums">
+              {formatAmount(totalDebit)}
+            </div>
           </div>
           <div className="rounded-lg bg-white p-4 shadow-sm">
-            <div className="text-sm text-gray-500">Total Credit (Money In)</div>
-            <div className="text-2xl font-semibold tabular-nums">{formatAmount(totalCredit)}</div>
+            <div className="text-sm text-gray-500">Total Credit </div>
+            <div className="text-2xl font-semibold tabular-nums">
+              {formatAmount(totalCredit)}
+            </div>
           </div>
         </section>
 
         <SearchFilters
-          search={search} onSearch={setSearch}
-          dateFilter={dateFilter} onDateFilter={setDateFilter}
-          onClear={() => { setSearch(""); setDateFilter(""); }}
-          onExport={handleExport} exporting={exporting} canExport={filtered.length > 0}
+          search={search}
+          onSearch={setSearch}
+          dateFilter={dateFilter}
+          onDateFilter={setDateFilter}
+          onClear={() => {
+            setSearch("");
+            setDateFilter("");
+          }}
+          onExport={handleExport}
+          exporting={exporting}
+          canExport={filtered.length > 0}
         />
 
         <RecordTable
-          records={filtered} loading={loading} hasFilters={hasFilters}
-          editingId={editingRecord?.id} busyId={busyId}
-          onEdit={(r) => { setEditingRecord(r); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+          records={filtered}
+          loading={loading}
+          hasFilters={hasFilters}
+          editingId={editingRecord?.id}
+          busyId={busyId}
+          onEdit={(r) => {
+            setEditingRecord(r);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
           onDelete={setDeleteTarget}
         />
       </main>
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4"
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
-            <p className="mb-6 text-base">Are you sure you want to delete this record?</p>
+            <p className="mb-6 text-base">
+              Are you sure you want to delete this record?
+            </p>
             <div className="flex justify-end gap-2">
-              <button className="btn-secondary" onClick={() => setDeleteTarget(null)}>Cancel</button>
-              <button className="btn-danger" onClick={confirmDelete}>Delete</button>
+              <button
+                className="btn-secondary"
+                onClick={() => setDeleteTarget(null)}
+              >
+                Cancel
+              </button>
+              <button className="btn-danger" onClick={confirmDelete}>
+                Delete
+              </button>
             </div>
           </div>
         </div>
